@@ -1,0 +1,17 @@
+{
+  "name": "mess-project-backend",
+  "version": "1.0.0",
+  "description": "Mess management system",
+  "keywords": [
+    "javascript",
+    "backend",
+    "chai"
+  ],
+  "license": "ISC",
+  "author": "sanjay meena",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
