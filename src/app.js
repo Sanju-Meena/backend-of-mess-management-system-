@@ -1,0 +1,1 @@
+// hello and welcome to the backend world of programming. This is the main entry point for the backend application. Here, we will set up the server, configure middleware, and define routes for handling requests.
