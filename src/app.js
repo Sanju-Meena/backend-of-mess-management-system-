@@ -8,7 +8,7 @@ const app = express();
 
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
-    credientisl: true
+    credientials: true
 }));
 
 app.use(express.json({limit: "16kb"}));
