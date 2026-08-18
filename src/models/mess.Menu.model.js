@@ -19,7 +19,6 @@ const messMenuSchema = new mongoose.Schema({
     },
     dinner:{
         type: String,
-        
         trim: true
     },
     snacks:{
@@ -36,4 +35,4 @@ const messMenuSchema = new mongoose.Schema({
     }
 },{timestamps: true});
 
-export const messMenu = mongoose.Schema("messMenu")
+export const messMenu = mongoose.model("messMenu",messMenuSchema);
