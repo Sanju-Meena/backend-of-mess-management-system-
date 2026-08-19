@@ -3,8 +3,9 @@ import mongoose from "mongoose";
 const messMenuSchema = new mongoose.Schema({
     day:{
         type: String,
-        lowercase: true,
-        trim: true
+        enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Special'],
+        required: [true, 'Please specify the day of the menu.'],
+        unique: true
     },
     breakfast:{
         type: String,
