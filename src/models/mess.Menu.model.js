@@ -3,18 +3,15 @@ import mongoose from "mongoose";
 const messMenuSchema = new mongoose.Schema({
     day:{
         type: String,
-        required: true,
         lowercase: true,
         trim: true
     },
     breakfast:{
         type: String,
-        required: true,
         trim: true
     },
     lunch:{
         type: String,
-        required: true,
         trim: true
     },
     dinner:{
