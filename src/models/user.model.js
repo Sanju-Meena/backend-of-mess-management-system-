@@ -46,12 +46,12 @@ const userSchema = new mongoose.Schema({
     ]
 },{timestamps: true});
 
-userSchema.pre("save", async function (next) {
-    if(!this.isModified("password")) return next();
+userSchema.pre("save", async function () {
+    if(!this.isModified("password")) return ;
 
-    this.password = await bcrypt.hash(this.password, 10)
-    next()
-})
+    this.password = await bcrypt.hash(this.password, 10);
+
+});
 
 // we can make custom method ;
 // we can take userSchema and take a method of ispasswordcorrect and we can compare the password with the hashed password in the database and return true or false

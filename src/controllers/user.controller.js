@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import jwt from "jsonwebtoken";
 
 const registerUser = asyncHandler(async(req,res)=>{
     // take the username, email, fullName, avatar, password, role from the request body
@@ -51,7 +52,7 @@ const registerUser = asyncHandler(async(req,res)=>{
     });
 
     const createdUser =  await User.findById(user._id).select(
-        "-password refreshToken"
+        "-password -refreshToken"
     );
 
     if(!createdUser){
@@ -63,5 +64,7 @@ const registerUser = asyncHandler(async(req,res)=>{
     );
 
 });
+
+const 
 
 export {registerUser};
