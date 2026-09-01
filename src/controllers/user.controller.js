@@ -5,6 +5,21 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 
+const generateAccessAndRefreshToken = async(userId) => {
+    try{
+        const user = await User.findById(userId);
+        const accessToken = user.generateAccessToken();
+        const refreshToken = user.generateRefreshToken();
+
+        user.refreshToken = refreshToken;        //refresh token add in user ;
+        await user.save({validateBeforeSave: false}); //save hone se pahele kuch check na hoo;
+        return {accessToken,refreshToken};
+    }
+    catch(error){
+        throw new ApiError(500,"something went wrong while generating access and refresh token");
+    }
+}
+
 const registerUser = asyncHandler(async(req,res)=>{
     // take the username, email, fullName, avatar, password, role from the request body
     // check any required field is empty in the request body  
@@ -37,7 +52,7 @@ const registerUser = asyncHandler(async(req,res)=>{
     if(!avatarLocalPath) throw new ApiError(400,"Avatar local path is  not found");  
     
     console.log("avatarLocalPath", avatarLocalPath);
-    console.log("req.files", req.files);
+    // console.log("req.files", req.files);
 
     const avatar = await uploadOnCloudinary(avatarLocalPath);
     if(!avatar) throw new ApiError(400, "Avatar file is required");
@@ -65,6 +80,71 @@ const registerUser = asyncHandler(async(req,res)=>{
 
 });
 
-const 
+const loginUser = asyncHandler(async(req,res)=>{
+    // take username and password
+    // check username is exist or not
+    // password is correct or not
+    // generate accesstoken and refresh token 
+    // send in cookies
 
-export {registerUser};
+    const{username, email, password} = req.body;
+    if(!password) throw new ApiError(400,"password is required");
+    if(!username || !email) throw new ApiError(400,"username or email is required");
+
+    const user = await User.findOne({
+        $or:[{username},{email}]
+    });
+    if(!user) throw new ApiError(400,"username is incorrect");
+    
+    const ispasswordcorrect = await user.isPasswordCorrect(password);
+    if(!ispasswordcorrect) throw new ApiError(400,"Password is incorrect");
+
+    const{accessToken, refreshToken} = await generateAccessAndRefreshToken(user._id);
+    
+    // send to cookie;
+    const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
+    
+    const options = {
+        httpOnly: true, 
+        secure:  true   
+        //server se modify hogi cookie only;
+    }
+     
+    return res.status(200)
+    .cookie("accessToken", accessToken,options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+        //statuscode, data, message tha iske format mai ;
+        new ApiResponse(200,{ user: loggedInUser, accessToken, refreshToken }
+            ,"User logged In successfully")
+        );
+
+});
+
+const logoutUser = asyncHandler(async(req,res)=>{
+    //user find karenge and then by making custom middleware 
+    // user k refresh and access token hatayenge mongodb se with the help of cookie;
+    const user = await User.findByIdAndUpdate(req.user._id,
+        {
+            $set: {refreshToken: undefined}
+        },
+        { new: true }
+    )
+
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res.status(200)
+    .clearCookie("accessToken")
+    .clearCookie("refreshToken")
+    .json(new ApiResponse(200,{},"user loggedout successfully"));
+
+});
+
+export {
+    registerUser,
+    loginUser,
+    logoutUser   
+};
