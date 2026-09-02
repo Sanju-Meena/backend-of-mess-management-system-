@@ -87,9 +87,11 @@ const loginUser = asyncHandler(async(req,res)=>{
     // generate accesstoken and refresh token 
     // send in cookies
 
+    console.log("Hello i am entering in loginUser field");
+
     const{username, email, password} = req.body;
     if(!password) throw new ApiError(400,"password is required");
-    if(!username || !email) throw new ApiError(400,"username or email is required");
+    if(!username && !email) throw new ApiError(400,"username or email is required");
 
     const user = await User.findOne({
         $or:[{username},{email}]
@@ -110,6 +112,8 @@ const loginUser = asyncHandler(async(req,res)=>{
         //server se modify hogi cookie only;
     }
      
+    console.log("Login successfully");
+
     return res.status(200)
     .cookie("accessToken", accessToken,options)
     .cookie("refreshToken", refreshToken, options)
@@ -124,6 +128,7 @@ const loginUser = asyncHandler(async(req,res)=>{
 const logoutUser = asyncHandler(async(req,res)=>{
     //user find karenge and then by making custom middleware 
     // user k refresh and access token hatayenge mongodb se with the help of cookie;
+    console.log("entering logout route");
     const user = await User.findByIdAndUpdate(req.user._id,
         {
             $set: {refreshToken: undefined}
@@ -136,12 +141,19 @@ const logoutUser = asyncHandler(async(req,res)=>{
         secure: true
     }
 
+    console.log("Logout successfully");
+
     return res.status(200)
-    .clearCookie("accessToken")
-    .clearCookie("refreshToken")
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
     .json(new ApiResponse(200,{},"user loggedout successfully"));
 
 });
+
+// const refreshAccessToken = asyncHandler(async(req,res)=>{
+//     req.co
+// })
+
 
 export {
     registerUser,
