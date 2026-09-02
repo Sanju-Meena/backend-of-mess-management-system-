@@ -150,13 +150,40 @@ const logoutUser = asyncHandler(async(req,res)=>{
 
 });
 
-// const refreshAccessToken = asyncHandler(async(req,res)=>{
-//     req.co
-// })
+const refreshAccessToken = asyncHandler(async(req,res)=>{
+    try{
+        const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
+        if(!incomingRefreshToken) throw new ApiError(401,"unauthorized request");
+        
+        const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
+        
+        const user = await findById(decodedToken?._id);
+        if(!user) throw new ApiError(400,"invalid refreshToken");
+
+        if(user?.refreshToken !== incomingRefreshToken) throw new ApiError(400,"incomingRefreshToken is not matched with mongodb refreshToken");
+        
+        const{newAccessToken, newRefreshToken} = await generateAccessAndRefreshToken(user._id);
+        
+        const options = {
+            httpOnly: true, 
+            secure:  true   
+        }
+
+        return res.status(200)
+        .cookie("accessToken", newAccessToken , options)
+        .cookie("refreshToken", newRefreshToken, options)
+        .json(
+            new ApiResponse(200,{newAccessToken, refreshToken: newRefreshToken},"AccessToken refreshed successfully"));
+    }
+    catch(error){
+        throw new ApiError(400,error?.message || "invalid refresh token");
+    }
+});
 
 
 export {
     registerUser,
     loginUser,
-    logoutUser   
+    logoutUser,
+    refreshAccessToken
 };
