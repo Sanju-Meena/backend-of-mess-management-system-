@@ -108,7 +108,7 @@ const loginUser = asyncHandler(async(req,res)=>{
     
     const options = {
         httpOnly: true, 
-        secure:  true   
+        secure:  process.env.NODE_ENV === "production"   
         //server se modify hogi cookie only;
     }
      
@@ -126,6 +126,9 @@ const loginUser = asyncHandler(async(req,res)=>{
 });
 
 const logoutUser = asyncHandler(async(req,res)=>{
+    // postman mai active access token chaiyea is format mai like
+    // HEADER MAI authorization select karoo or value mai -> Bearer ajoiaihfoaoGFAA....
+
     //user find karenge and then by making custom middleware 
     // user k refresh and access token hatayenge mongodb se with the help of cookie;
     console.log("entering logout route");
@@ -138,7 +141,7 @@ const logoutUser = asyncHandler(async(req,res)=>{
 
     const options = {
         httpOnly: true,
-        secure: true
+        secure: process.env.NODE_ENV === "production"
     }
 
     console.log("Logout successfully");
@@ -151,39 +154,131 @@ const logoutUser = asyncHandler(async(req,res)=>{
 });
 
 const refreshAccessToken = asyncHandler(async(req,res)=>{
+    // body mai refresh token daaloo login se copy kr k as it is
     try{
+        console.log("entering refreshAccessToken route");
         const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
         if(!incomingRefreshToken) throw new ApiError(401,"unauthorized request");
         
         const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
         
-        const user = await findById(decodedToken?._id);
+        const user = await User.findById(decodedToken?._id);
         if(!user) throw new ApiError(400,"invalid refreshToken");
 
         if(user?.refreshToken !== incomingRefreshToken) throw new ApiError(400,"incomingRefreshToken is not matched with mongodb refreshToken");
         
-        const{newAccessToken, newRefreshToken} = await generateAccessAndRefreshToken(user._id);
+        const{accessToken, refreshToken} = await generateAccessAndRefreshToken(user._id);
         
         const options = {
             httpOnly: true, 
-            secure:  true   
+            secure:  process.env.NODE_ENV === "production"
         }
+        console.log("successfully executed refreshAccessToken route");
 
         return res.status(200)
-        .cookie("accessToken", newAccessToken , options)
-        .cookie("refreshToken", newRefreshToken, options)
+        .cookie("accessToken", accessToken , options)
+        .cookie("refreshToken", refreshToken, options)
         .json(
-            new ApiResponse(200,{newAccessToken, refreshToken: newRefreshToken},"AccessToken refreshed successfully"));
+            new ApiResponse(200,{accessToken, refreshToken: refreshToken},"AccessToken refreshed successfully"));
     }
     catch(error){
         throw new ApiError(400,error?.message || "invalid refresh token");
     }
 });
 
+// use verifyjwt run 
+// take input like oldpassword, newpassword,confirmpassword
+// check oldpassword if correct
+// set new password 
+// set in mongodb
+const changeCurrentPassword = asyncHandler(async(req,res)=>{
+    const{username,oldPassword, newPassword,confirmPassword} = req.body;
+    if(!username || !oldPassword || !newPassword || !confirmPassword) throw new ApiError(400,"please fill all crediential");
+
+    if(confirmPassword !== newPassword) throw new ApiError(400,"confirmpassword and newPassword is not same");
+
+    // const user = await User.findone({
+    //     $or:[{username, email}]
+    // });
+    const user = await User.findById(req.user?._id);
+    
+    // if(!user) throw new ApiError(400,"user not exist"); //iski jarurat nhi bcz verifyJWT handle this;
+    
+    // isPasswordCorrect = ipc
+    const ipc = await user.isPasswordCorrect(oldPassword);
+    if(!ipc) throw new ApiError(400,"oldpassword is incorrect");
+    
+    user.password = newPassword;
+    await user.save({validateBeforeSave: false});
+
+    return res.status(200).
+    json(
+        new ApiResponse(200,{},"Password update successfully")
+    )
+});
+
+const getCurrentUser = asyncHandler(async(req,res)=>{
+    return res.status(200).
+    json(200,req.user,"Current user fetched successfully");
+});
+
+// update fullName and email  
+const updateAccountDetails = asyncHandler(async(req,res)=>{
+    // file update alag se karvani chaiyea, usmai direct file loo or save karna ka option doo, or save kr doo ;
+    const {newFullName, email} = req.body;
+    if(!newFullName || !email) throw new ApiError(400,"fullName and email both are required");
+    
+    const user = await findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set:{
+                fullName: newFullName,
+                email
+            }
+        },
+        {new: true} //update hone k baad vali info return hoti hai
+    ).select("-password")
+    
+    return res.status(200)
+    .json(
+        new ApiResponse(200,user,"fullName and email updated successfully")
+    )
+});
+
+const updateUserAvatar = asyncHandler(async(req,res)=>{
+
+    const avatarLocalPath = req.file?.path;
+    if(!avatarLocalPath) throw new ApiError(400,"file is required");
+    
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+    if(!avatar.url) throw new ApiError(401,"Error while uploading file on cloudinary");
+    
+    const user = await findByIdAndUpdate(
+        req.user._id,
+        {
+            $set:{
+                avatar: avatar.url
+            }
+        },
+        {new: true}
+    ).select("-password");    
+
+    return res.status(200)
+    .json(
+        new ApiResponse (200,user,"avatar update successfully")
+    )
+});
+
+
+
 
 export {
     registerUser,
     loginUser,
     logoutUser,
-    refreshAccessToken
+    refreshAccessToken,
+    changeCurrentPassword,
+    getCurrentUser,
+    updateAccountDetails,
+    updateUserAvatar
 };
