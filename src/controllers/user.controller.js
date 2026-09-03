@@ -192,8 +192,8 @@ const refreshAccessToken = asyncHandler(async(req,res)=>{
 // set new password 
 // set in mongodb
 const changeCurrentPassword = asyncHandler(async(req,res)=>{
-    const{username,oldPassword, newPassword,confirmPassword} = req.body;
-    if(!username || !oldPassword || !newPassword || !confirmPassword) throw new ApiError(400,"please fill all crediential");
+    const{oldPassword, newPassword,confirmPassword} = req.body;
+    if(!oldPassword || !newPassword || !confirmPassword) throw new ApiError(400,"please fill all crediential");
 
     if(confirmPassword !== newPassword) throw new ApiError(400,"confirmpassword and newPassword is not same");
 
@@ -219,7 +219,9 @@ const changeCurrentPassword = asyncHandler(async(req,res)=>{
 
 const getCurrentUser = asyncHandler(async(req,res)=>{
     return res.status(200).
-    json(200,req.user,"Current user fetched successfully");
+    json(
+        new ApiResponse(200,req.user,"Current user fetched successfully")
+    )
 });
 
 // update fullName and email  
@@ -228,8 +230,8 @@ const updateAccountDetails = asyncHandler(async(req,res)=>{
     const {newFullName, email} = req.body;
     if(!newFullName || !email) throw new ApiError(400,"fullName and email both are required");
     
-    const user = await findByIdAndUpdate(
-        req.user?._id,
+    const user = await User.findByIdAndUpdate(
+        req.user._id,
         {
             $set:{
                 fullName: newFullName,
@@ -237,7 +239,9 @@ const updateAccountDetails = asyncHandler(async(req,res)=>{
             }
         },
         {new: true} //update hone k baad vali info return hoti hai
-    ).select("-password")
+    ).select("-password");
+
+    if(!user) throw new ApiError(401,"user is not found in mongodb");
     
     return res.status(200)
     .json(
@@ -253,7 +257,7 @@ const updateUserAvatar = asyncHandler(async(req,res)=>{
     const avatar = await uploadOnCloudinary(avatarLocalPath);
     if(!avatar.url) throw new ApiError(401,"Error while uploading file on cloudinary");
     
-    const user = await findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
         req.user._id,
         {
             $set:{
