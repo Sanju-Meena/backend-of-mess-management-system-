@@ -20,6 +20,10 @@ const complaintSchema = new mongoose.Schema({
         enum:["pending","resolved","ongoing"],
         default: "pending"
     },
+    complaner_name:{
+        type: String,
+        required: true
+    },
     owner:{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

@@ -23,6 +23,7 @@ const complain = asyncHandler(async(req,res) => {
             content,
             category,
             image: image_path,
+            complaner_name: req.user?.fullName,
             owner: req.user?._id            
         }
     );
