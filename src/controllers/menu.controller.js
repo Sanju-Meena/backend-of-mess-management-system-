@@ -71,7 +71,8 @@ const getMenu = asyncHandler(async(req,res) => {
         day = day.toLowerCase().trim();
         const validDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'special'];
         if (!validDays.includes(day)) throw new ApiError(400, "Invalid day spelling or name.");
-
+        
+        console.log(`get ${day} menu`);
         let day_menu = await Messmenu.findOne({day}) ;
         if(!day_menu) throw new ApiError(404,`something went wrong while finding ${day_menu} menu in database`);
         console.log("menu ",day_menu);
@@ -80,6 +81,7 @@ const getMenu = asyncHandler(async(req,res) => {
             new ApiResponse(200,day_menu,"successfully done")
         );   
     }
+
     console.log("get full menu");
     const menu = await Messmenu.find({}) ;
     if(!menu) throw new ApiError(404,"something went wrong while finding menu in database");

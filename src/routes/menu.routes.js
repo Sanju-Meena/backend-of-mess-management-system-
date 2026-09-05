@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createMenu, updateMenu,getMenu } from "../controllers/menu.controller.js";
+import { createMenu, updateMenu, getMenu } from "../controllers/menu.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js"
 import { checkPermission } from "../middlewares/permission.middleware.js"
 const router = Router();
