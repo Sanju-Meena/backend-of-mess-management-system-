@@ -36,7 +36,7 @@ const registerUser = asyncHandler(async(req,res)=>{
 
     if(!email || !username || !fullName || !password || !role) throw new ApiError(400,"All fields are required");
 
-    if(role != "admin") throw new ApiError(400,"Please select the valid role");
+    if(role != "student") throw new ApiError(400,"Please select the valid role");
     
     const existedUser = await User.findOne({
         $or: [{ username },{ email }]

@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 const complaintSchema = new mongoose.Schema({
     content:{
         type: String,
-        required: true,
         trim: true
     },
     category:{
@@ -12,6 +11,9 @@ const complaintSchema = new mongoose.Schema({
         enum: ["food-quality","cleanliness","timing","others"],
         lowercase: true,
         trim: true,
+    },
+    image:{
+        type: String,
     },
     status:{
         type: String,

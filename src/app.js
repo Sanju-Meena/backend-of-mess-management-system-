@@ -19,10 +19,12 @@ app.use(cookieParser());
 // routes import
 import userRouter from "./routes/user.routes.js";
 import menuRouter from "./routes/menu.routes.js";
+import complainRouter from "./routes/complain.routes.js";
 
 // routes declaration
 app.use("/api/v1/users", userRouter); 
 app.use("/api/v2/menu", menuRouter);
+app.use("/api/v3/complain", complainRouter);
 
 
 // http://localhost:8000/api/v1/user/register

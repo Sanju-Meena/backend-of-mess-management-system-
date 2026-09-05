@@ -33,4 +33,5 @@ router.route("/current_user").post(verifyJWT, getCurrentUser);
 router.route("/change-fullname-email").post(verifyJWT, updateAccountDetails);
 router.route("/change-avatar").post(verifyJWT, upload.single("avatar"),updateUserAvatar);
 
+
 export default router;
