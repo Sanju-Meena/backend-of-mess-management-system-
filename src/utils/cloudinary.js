@@ -29,21 +29,16 @@ const uploadOnCloudinary = async (localFilePath)=>{
         }
         
         const response =  await cloudinary.uploader.upload(localFilePath, {
-            resource_type: "auto"
-            // 'resource_type: "auto"' ka matlab hai Cloudinary khud pehchan lega ki yeh image hai, video hai ya pdf.
+            resource_type: "auto"  // 'resource_type: "auto"' ka matlab hai Cloudinary khud pehchan lega ki yeh image hai, video hai ya pdf.
         })
-        
-        // Console mein print kar rahe hain ki upload ho gaya aur sath mein us file ka naya internet URL check kar rahe hain
         console.log("file is uploaded on cloudinary",response.url);
         
         fs.unlinkSync(localFilePath);  // Jab file cloud par chali gayi, toh apne local system se delete kar do! mtlb public folder se delete kr doo;
        console.log("response", response);
        return response; // Agar upload successful raha, toh Cloudinary se mila pura data (URL, public_id, etc.) wapas bhej do
-        
-    } catch (error) {
+    }catch (error) {
         console.log("cloudinary upload error",error);
         fs.unlinkSync(localFilePath) ;
-        // remove the file from local storage if there is an error while uploading to cloudinary;
         return null;
     }
 }

@@ -3,24 +3,20 @@ import mongoose from "mongoose";
 const messMenuSchema = new mongoose.Schema({
     day:{
         type: String,
-        enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Special'],
+        enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'special'],
         required: [true, 'Please specify the day of the menu.'],
         unique: true
     },
     breakfast:{
-        type: String,
+        type: [String],
         trim: true
     },
     lunch:{
-        type: String,
+        type:  [String],
         trim: true
     },
     dinner:{
-        type: String,
-        trim: true
-    },
-    snacks:{
-        type: String,
+        type:  [String],
         trim: true
     },
     isavailable:{
@@ -33,4 +29,4 @@ const messMenuSchema = new mongoose.Schema({
     }
 },{timestamps: true});
 
-export const messMenu = mongoose.model("messMenu",messMenuSchema);
+export const Messmenu = mongoose.model("Messmenu", messMenuSchema);

@@ -34,13 +34,9 @@ const registerUser = asyncHandler(async(req,res)=>{
     const {username, email,fullName, password, role} = req.body;
     console.log("register user", req.body);
 
-    if(!email || !username || !fullName || !password || !role) {
-        throw new ApiError(400,"All fields are required");
-    }
+    if(!email || !username || !fullName || !password || !role) throw new ApiError(400,"All fields are required");
 
-    if(role != "student"){
-         throw new ApiError(400,"Please select the valid role");
-    }
+    if(role != "admin") throw new ApiError(400,"Please select the valid role");
     
     const existedUser = await User.findOne({
         $or: [{ username },{ email }]
@@ -272,9 +268,6 @@ const updateUserAvatar = asyncHandler(async(req,res)=>{
         new ApiResponse (200,user,"avatar update successfully")
     )
 });
-
-
-
 
 export {
     registerUser,
