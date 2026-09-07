@@ -17,6 +17,7 @@ export const checkPermission = (allowedRoles)=>{
                 }
             }
             if (flag == 0) throw new ApiError(403, "You do not have the permission to access this route");
+            console.log("permission vali file perfectly executed");
             next();
 
         }catch(error){

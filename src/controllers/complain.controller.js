@@ -34,6 +34,66 @@ const complain = asyncHandler(async(req,res) => {
     );
 });
 
+const updateComplainStatus = asyncHandler(async(req,res) => {
+    console.log("enter in updateComplainStatus");
+    
+    const { id: complaintId } = req.params;
+
+    if(!complaintId) throw new ApiError(400, "Compalaint id is required");
+    console.log("id finded");
+
+    const { updateStatus } = req.body;
+
+    if(!(updateStatus === "pending" || updateStatus === "ongoing" || updateStatus === "resolved")) 
+        throw new ApiError(400, "Invalid status type send by backend");
+
+    const changestatusfromdb = await Complaint.findByIdAndUpdate(
+        complaintId,
+        {
+            $set:{
+                status: updateStatus
+            }
+        },
+        {new: true}
+    );
+
+    return res.status(200)
+    .json(
+        new ApiResponse(200,changestatusfromdb,"status update successfully")
+    );
+})
+
+const showComplain = asyncHandler(async(req,res) => {
+    console.log("enter in show complain controller");
+    const allcomplain = await Complaint.find({
+        status: { $in: ["pending","ongoing"] }
+    });
+
+    if(!allcomplain) throw new ApiError(500,"internal server error");
+
+    return res.status(200)
+    .json(
+        new ApiResponse(200,allcomplain,"complain shown successfully")
+    );
+});
+ 
+const resolvedComplain = asyncHandler(async(req,res) => {
+    console.log("enter in show resolved complain controller");
+    const resolvedcomplain = await Complaint.find({
+        status: { $in: ["resolved"] }
+    });
+
+    if(!resolvedcomplain) throw new ApiError(500,"internal server error");
+    console.log("resolved complained successfully worked");
+    return res.status(200)
+    .json(
+        new ApiResponse(200,resolvedcomplain,"resolved complain shown successfully")
+    );
+});
+ 
 export {
-    complain
+    complain,
+    updateComplainStatus,
+    showComplain,
+    resolvedComplain
 }
