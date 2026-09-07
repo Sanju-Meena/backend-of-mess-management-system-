@@ -90,10 +90,26 @@ const resolvedComplain = asyncHandler(async(req,res) => {
         new ApiResponse(200,resolvedcomplain,"resolved complain shown successfully")
     );
 });
+
+const getMyComplaints = asyncHandler(async(req,res) => {
+
+    const mycomplain = await Complaint.find({owner: req.user._id});
+
+    if(!mycomplain) throw new ApiError(500,"internal server error");
+    console.log("get my complints works successfully");
+
+    return res.status(200)
+    .json(
+        new ApiResponse(200,mycomplain,"my complain shown successfully")
+    );
+
+
+});
  
 export {
     complain,
     updateComplainStatus,
     showComplain,
-    resolvedComplain
+    resolvedComplain,
+    getMyComplaints
 }
